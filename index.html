@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<body>
+    <div>
+        React入门---react脚手架
+React是Facebook研发的一款前端框架(MVC框架：侧重于view层操作)，目前在行业内广泛使用。为了让框架的体积变得更轻量级，设计者们把其定义为“渐进式”框架,也就是:
+
+主体核心的部分都在react/react-dom两个框架中
+如果想使用路由，我们需要安装react-router
+如果想使用redux进行状态统一管理，我们再安装redux/react-redux
+如果想实现其它的功能，我们还可以继续安装 中间件/axious等 ...
+根据用户所需，再安装不同的配套组件来完成，这就是"渐进式"设计思想(vue也是这样设计的)
+这样的操作有好处，也有弊端，麻烦的是，开发中我们需要不断的安装各种组件，而且react独有的jsx语法是不能直接的被浏览器解析的，我们在编写程序过程中使用的es6/less等待都需要进行编译处理...
+
+此时我们非常期待有一款自动化部署工具，可以帮助我们自动完成这些编译的操作，webpack就是目前项目中非常常用的自动化部署平台，我们在搭建项目之前，还需要自己配置webpack。 ... 类似于这样的操作还有很多，所以复杂繁琐的项目配置，模块安装等成为开发者们一大痛苦，有人调侃，是不是以后会出现"前端配置工程师"; 为了解决这些问题，市面上有很多react项目开发的脚手架:
+generator-z-react-cli
+create-react-app
+... 通过这些脚手架，我们可以快速搭建一套完整的react项目结构，避免人工手动一点点配置。
+create-react-app
+FaceBook官方发布了一个无需配置，用于快速构建开发环境的脚手架工具:https://github.com/facebook/create-react-app
+
+1.首先基于npm在全局安装create-react-app
+
+npm install -g create-react-app
+
+2.在指定目录中创建一个react项目工程
+
+create-react-app my-app
+
+my-app是自己设置的项目名称（遵循npm模块发布时的要求，例如，名字中布恩那个出现大写字母或者汉字以及特殊字符等）
+
+3.进入到指定的项目文件，启动项目
+
+cd my-app
+
+npm run start 或者 $ yarn start(前提是在全局安装了yarn)
+
+生产的结构目录
+
+my-app
+  |--build      //构建目录，遵循发布系统规范
+  |   |-- index.html    //静态页面
+  |   |-- static        //资源文件
+  |
+  |-- node_modules      //项目组件文件夹：所有安装的组件都在这
+  |
+  |--src                //源码目录
+  |   |--index.js       //入口文件(还生成了其它的文件，但是没啥用，我们可以直接的删除掉)
+  |
+  |--public             //静态页面目录
+  |   |--index.html     //主页面(还生成了其它的文件，但是没啥用，我们可以直接的删除掉)
+  |
+  |-- .gitignore        //git提交的忽略文件，我们一般还需要再手动增加.idea(通过webstorm编辑工具进行开发，生成的文件)
+  |--package.json   //项目依赖项及项目基础信息
+  |--README.md      //项目描述
+  |-- ...
+复制代码
+生成的package.json
+
+{
+  "name": "my-app",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {  //=>生产依赖项
+    "react": "^16.2.0",
+    "react-dom": "^16.2.0",
+    "react-scripts": "1.1.0"
+  },
+  "scripts": {   //=>可执行脚本
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test --env=jsdom",
+    "eject": "react-scripts eject"
+  }
+}
+
+/*
+ * 可执行脚本注释:
+ *   $ npm run start  启动服务，自动编译项目，可以实现边开发，边自动编译刷新，看到最新开发的效果
+ *   
+ *   $ npm run build  把项目整体进行编译，最后再bulid目录中生成项目编译后的文件，我们上传服务器的就是这些文件
+ *   
+ *   $ npm run test   使用Jest作为测试运行程序（不常用） 
+ *    
+ *   $ npm run eject  下文具体介绍使用
+ *   
+ *   当然以上操作也可以基于yarn来完成
+ */
+复制代码
+通过分析，我们发现create-react-app有如下的一些特点：
+
+仅仅是安装了react中最常用的react/react-dom组件，其余的并没有安装，所以再项目开发中，我们根据需要，可能还会安装:$ yarn add redux react-redux react-router-dom prop-types等等
+生成项目后，脚手架为了"优雅"，隐藏了所有的webpack相关的配置文件，此时查看myapp文件夹目录，会发现找不到任何webpack配置文件;这也就导致了，如果我们需要在webpack中安装一些自己的loader或者plugin变的很困难；
+create-react-app自动生成的webpack中集成了:eslint(代码检测、url-loader(图片BASE64[小于10000kb的图片])、babel-loader(ES6和JSX语法解析)、style-loader、css-loader(CSS代码解析)、HtmlWebpackPlugin(产出HTML插件)等内容
+...
+npm run eject 上面提到，脚手架为了"优雅",隐藏了所有的webpack相关配置文件，如果我们想要基于原来的基础再次增加一些自己的东西，首先就要找到这些隐藏文件并且进行修改。
+
+有的开发者直接到node_modules中去搜索webpack.config...等文件，然后进行修改，修改后发现生效了，但是当修改后，我们又安装了一些其它项目模块，重新编译的时候，又回到了原有的配置信息(很头疼的问题，总不能每一次安装新模块后，都重新改一次需要修改的配置吧...)
+
+基于create-react-app创建完成项目后，会提供一个eject命令($ yarn eject)，基于这个命令，可以把隐藏的webpack文件展示出来，方便我们二次进行配置。
+
+$yarn eject或者npm run eject 此命令执行完成不可逆转(慎重使用)
+
+执行完成后，我们可以看到原有的结构目录发生了一些变化(新增两个文件夹,package.json中的内容也跟着发生改变)
+
+结构更改
+
+my-app
+  |-- config        //webpack的配置文件都在这里
+  |     |--jest
+  |     |  |--cssTransform.js
+  |     |  |--fileTransform.js
+  |     |--env.js
+  |     |--paths.js
+  |     |--polyfills.js
+  |     |--webpack.config.dev.js
+  |     |--webapck.config.prod.js
+  |     |--webpackDevServer.config.js
+  |
+  |--scripts
+  |   |-- build.js
+  |   |-- start.js
+  |   |-- test.js
+  后期如果想修改配置信息，修改webpack.config.dev.js、webpack.config.prod.js即可，当然其它的大家也可以去修改(前提是研究明运行的原理)
+复制代码
+package.json中的变更
+
+{
+  "name": "my-app2",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": { //=>在依赖项中把之前隐藏的（已经安装的）模块都显示出来了，其中很多都是配置webpack需要安装的 
+    "autoprefixer": "7.1.6",
+    "babel-core": "6.26.0",
+    "babel-eslint": "7.2.3",
+    "babel-jest": "20.0.3",
+    "babel-loader": "7.1.2",
+    "babel-preset-react-app": "^3.1.1",
+    "babel-runtime": "6.26.0",
+    "case-sensitive-paths-webpack-plugin": "2.1.1",
+    "chalk": "1.1.3",
+    "css-loader": "0.28.7",
+    "dotenv": "4.0.0",
+    "dotenv-expand": "4.0.1",
+    "eslint": "4.10.0",
+    "eslint-config-react-app": "^2.1.0",
+    "eslint-loader": "1.9.0",
+    "eslint-plugin-flowtype": "2.39.1",
+    "eslint-plugin-import": "2.8.0",
+    "eslint-plugin-jsx-a11y": "5.1.1",
+    "eslint-plugin-react": "7.4.0",
+    "extract-text-webpack-plugin": "3.0.2",
+    "file-loader": "1.1.5",
+    "fs-extra": "3.0.1",
+    "html-webpack-plugin": "2.29.0",
+    "jest": "20.0.4",
+    "object-assign": "4.1.1",
+    "postcss-flexbugs-fixes": "3.2.0",
+    "postcss-loader": "2.0.8",
+    "promise": "8.0.1",
+    "raf": "3.4.0",
+    "react": "^16.2.0",
+    "react-dev-utils": "^5.0.0",
+    "react-dom": "^16.2.0",
+    "redux": "^3.7.2",
+    "style-loader": "0.19.0",
+    "sw-precache-webpack-plugin": "0.11.4",
+    "url-loader": "0.6.2",
+    "webpack": "3.8.1",
+    "webpack-dev-server": "2.9.4",
+    "webpack-manifest-plugin": "1.3.2",
+    "whatwg-fetch": "2.0.3"
+  },
+  "scripts": { //=>去掉了eject命令（这个命令是不可逆转的，执行一次生效后，就去掉这命令了）
+    "start": "node scripts/start.js",
+    "build": "node scripts/build.js",
+    "test": "node scripts/test.js --env=jsdom"
+  },
+  "jest": { 
+    "collectCoverageFrom": [
+      "src/**/*.{js,jsx,mjs}"
+    ],
+    "setupFiles": [
+      "<rootDir>/config/polyfills.js"
+    ],
+    "testMatch": [
+      "<rootDir>/src/**/__tests__/**/*.{js,jsx,mjs}",
+      "<rootDir>/src/**/?(*.)(spec|test).{js,jsx,mjs}"
+    ],
+    "testEnvironment": "node",
+    "testURL": "http://localhost",
+    "transform": {
+      "^.+\\.(js|jsx|mjs)$": "<rootDir>/node_modules/babel-jest",
+      "^.+\\.css$": "<rootDir>/config/jest/cssTransform.js",
+      "^(?!.*\\.(js|jsx|mjs|css|json)$)": "<rootDir>/config/jest/fileTransform.js"
+    },
+    "transformIgnorePatterns": [
+      "[/\\\\]node_modules[/\\\\].+\\.(js|jsx|mjs)$"
+    ],
+    "moduleNameMapper": {
+      "^react-native$": "react-native-web"
+    },
+    "moduleFileExtensions": [
+      "web.js",
+      "mjs",
+      "js",
+      "json",
+      "web.jsx",
+      "jsx",
+      "node"
+    ]
+  },
+  "babel": {
+    "presets": [
+      "react-app"
+    ]
+  },
+  "eslintConfig": {
+    "extends": "react-app"
+  }
+}
+复制代码
+如果你熟练掌握webpack的配置操作，那么接下来就可以自己去扩充webpack了...
+
+generator-z-react-cli
+一款基于yeoman generator的脚手架：http://yeoman.io/ 1.首先基于npm在全局安装yeoman
+
+npm install -g yo
+
+2.其次在全局下安装脚手架
+
+npm install -g generator-z-react-cli
+
+3.最后生成项目
+
+yo z-react-cli
+
+结构目录
+
+my-app
+  |-- index.html //启动页(主页)
+  |-- build //构建目录，遵循发布系统规范
+  |    |-- index.html   //静态页面
+  |    |-- static       //资源文件发布到cdn,或发布到服务器  
+  |
+  |-- src                     //源码目录
+  |    |--component           // 组件
+  |    |      |-- common      //公共组件
+  |    |      |-- temp        //父组件
+  |    |--Config              //工具方法
+  |    |--Image               //图片资源
+  |    |--Redux               //react-redux数据状态管理
+  |    |      |-- action.jsx  //派发数据的action
+  |    |      |-- reducer.jsx //用于处理action的reducer
+  |    |      |-- store.jsx   //数据管理器
+  |    |-- Router           //路由
+  |    |-- Style            //样式
+  |    |-- template         //编译html模板
+  |    |-- App.jsx          //js入口文件
+  |
+  |-- webpack.config.hot       //本地热编译
+  |-- webpack.config.buildt    //编译发布测试环境
+  |-- webpack.config.online    //编译发布线上环境
+  |-- server.js
+  |-- server_hot.js    //本地服务器启动文件
+  |-- .babelrc  //ES6语言解析设置
+  |-- package.json  //项目依赖项
+  |-- ...
+复制代码
+可执行命令
+
+安装依赖
+npm install
+
+在本地主机(8088端口)上提供热重载:即输入http://localhost:8088可访问正在开发的项目
+npm run hot
+
+#项目整体编译部署，用于测试环境 npm run buildt
+
+#项目整体编译部署，用于线上环境 npm run online
+
+功能特色
+
+可以解析JSX语法 可以解析ES6语法新特性 支持LESS、SCSS预处理器 编译完成自动打开浏览器 单独分离CSS样式文件 支持文件MD5戳，解决文件缓存问题 支持图片，图标字体等资源的编译 支持浏览器源码调试 实现组件级热更新 实现代码的热替换，浏览器实时刷新查看效果 区分开发环境和生产环境分离业务功能代码和公共依赖代码 ...
+
+package.json文件部分预览
+
+{
+  "name": "my-app",  //=>项目名称
+  "version": "1.0.0",  //=>项目版本
+  "description": "...", //=>项目描述
+  "main": "index.js", //=>项目入口文件
+  "scripts": {  //=>可执行的命令脚本
+    "dev": "node server.js",  //=>启动服务
+    "hot": "node server_hot.js", //=>项目本地预览
+    "buildt": "webpack --config webpack.config.buildt.js --progress --colors --watch -p", //=>项目编译：用于测试
+    "online": "webpack --config webpack.config.online.js --progress --colors --watch -p"  //=>项目编译：用于线上
+  },
+  ...
+  "dependencies": {  //=>生产依赖模块
+    "babel-polyfill": "^6.23.0",
+    "body-parser": "^1.17.1",
+    "deep-extend": "^0.4.1",
+    "github-markdown-css": "^2.4.0",
+    "immutable": "^3.8.1",
+    "isomorphic-fetch": "^2.2.1",
+    "normalize.css": "^4.1.1",
+    "pure-render-decorator": "^1.2.1",
+    "react": "^15.5.4",
+    "react-dom": "^15.3.2",
+    "react-redux": "^4.4.5",
+    "react-router": "^4.1.1",
+    "react-router-dom": "^4.1.1",
+    "redux": "^3.6.0",
+    "redux-immutablejs": "^0.0.8",
+    "redux-promise": "^0.5.3",
+    "redux-thunk": "^2.1.0",
+    "sass-loader": "^4.1.1"
+  },
+  "devDependencies": {  //=>开发依赖模块
+    "autoprefixer-loader": "^3.2.0",
+    "babel-core": "^6.23.1",
+    "babel-loader": "^6.2.8",
+    "babel-plugin-transform-decorators-legacy": "^1.3.4",
+    "babel-preset-es2015": "^6.6.0",
+    "babel-preset-react": "^6.5.0",
+    "babel-preset-react-hmre": "^1.1.1",
+    "babel-preset-stage-0": "^6.16.0",
+    "body-parser": "^1.15.1",
+    "browser-sync": "^2.18.8",
+    "clean-webpack-plugin": "^0.1.16",
+    "css-loader": "^0.23.1",
+    "express": "^4.14.0",
+    "extract-text-webpack-plugin": "^1.0.1",
+    "file-loader": "^0.8.5",
+    "html-webpack-plugin": "^2.22.0",
+    "http-proxy-middleware": "^0.17.3",
+    "jsx-loader": "^0.13.2",
+    "less": "^2.6.1",
+    "less-loader": "^2.2.3",
+    "node-sass": "^3.11.3",
+    "react-hot-loader": "^1.3.1",
+    "react-transform-catch-errors": "^1.0.2",
+    "react-transform-hmr": "^1.0.4",
+    "redbox-react": "^1.3.3",
+    "sass": "^0.5.0",
+    "sass-loader": "^4.0.2",
+    "style-loader": "^0.13.1",
+    "url-loader": "^0.5.7",
+    "webpack": "^1.13.0",
+    "webpack-dev-middleware": "^1.8.4",
+    "webpack-dev-server": "1.14.1",
+    "webpack-hot-middleware": "^2.13.2"
+  }
+}
+复制代码
+这个脚手架要比create-react-app提供更为丰富的功能，大家可根据自己的喜好选择。
+    </div>
+</body>
+</html>
